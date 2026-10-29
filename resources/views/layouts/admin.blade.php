@@ -1,92 +1,177 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-100">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Chess LIV Admin') }}</title>
+    <title>@yield('title', 'Admin Console - ChessLiv')</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
 
-    <!-- Scripts and Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Bootstrap 5.3 CSS -->
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap/bootstrap-icons.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Custom ChessLiv CSS -->
+    <link rel="stylesheet" href="{{ asset('css/chessliv.css') }}">
+
+    <style>
+        .admin-nav .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+        .admin-nav .nav-link:hover {
+            color: #ffc107;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .admin-nav .nav-link.active {
+            color: #000 !important;
+            background-color: #ffc107 !important;
+            font-weight: 700;
+        }
+        .admin-card {
+            background-color: #16181c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .stat-card {
+            background: linear-gradient(145deg, #181b20, #131519);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+        .stat-num {
+            font-size: 1.85rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+    </style>
+
+    @stack('styles')
 </head>
-<body class="font-sans antialiased h-full">
-    <div class="min-h-full flex">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
-            <div class="p-6">
-                <div class="flex items-center space-x-2">
-                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                    <span class="text-xl font-bold tracking-tight">Chess <span class="text-blue-500">ADMIN</span></span>
+<body class="bg-black text-light">
+
+    {{-- Top Admin Navbar --}}
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark border-bottom border-secondary border-opacity-50 py-2 sticky-top shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{{ route('admin.ingestion.index') }}">
+                <span class="fs-4 text-warning"><i class="bi bi-shield-lock-fill"></i></span>
+                <span class="font-heading">CHESS<span class="text-warning">LIV</span></span>
+                <span class="badge bg-warning text-dark text-uppercase small ms-1" style="font-size: 0.65rem;">Admin</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="adminNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-xl-0 admin-nav gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.ingestion.*') ? 'active' : '' }}" href="{{ route('admin.ingestion.index') }}">
+                            <i class="bi bi-rss me-1"></i>Feeds & Ingestion
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.history.*') ? 'active' : '' }}" href="{{ route('admin.history.index') }}">
+                            <i class="bi bi-clock-history me-1"></i>Import History & Failures
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">
+                            <i class="bi bi-folder2-open me-1"></i>Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.games.*') ? 'active' : '' }}" href="{{ route('admin.games.index') }}">
+                            <i class="bi bi-controller me-1"></i>Games Metadata
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.health.*') || request()->routeIs('admin.status.*') ? 'active' : '' }}" href="{{ route('admin.health.index') }}">
+                            <i class="bi bi-heart-pulse me-1"></i>System Health
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('home') }}" target="_blank" class="btn btn-sm btn-outline-secondary text-light">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Public Site
+                    </a>
+
+                    @auth
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-dark border border-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="rounded-circle bg-warning text-dark fw-bold px-2 py-0 small">A</span>
+                            <span>{{ Auth::user()->name }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><span class="dropdown-item-text small text-muted">{{ Auth::user()->email }}</span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('admin.logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    @endauth
                 </div>
             </div>
-            <nav class="flex-grow px-4 pb-4 space-y-2">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-blue-600' : 'hover:bg-slate-800' }} transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="{{ route('admin.users.index') }}" class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-blue-600' : 'hover:bg-slate-800' }} transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <span>Users</span>
-                </a>
-                <a href="/" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    <span>Back to Site</span>
-                </a>
-            </nav>
-            <div class="p-4 border-t border-slate-800">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-red-600 transition text-slate-400 hover:text-white">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="flex-grow flex flex-col min-w-0 overflow-hidden">
-            <!-- Topbar -->
-            <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
-                <div class="flex items-center">
-                    <button class="md:hidden text-slate-600 mr-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                    </button>
-                    <h2 class="text-xl font-semibold text-slate-800">@yield('page_title', 'Admin Panel')</h2>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-slate-900">{{ Auth::user()->name }}</p>
-                        <p class="text-xs text-slate-500 uppercase tracking-widest">{{ Auth::user()->role }}</p>
-                    </div>
-                    <img class="w-10 h-10 rounded-full bg-slate-200" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=random" alt="">
-                </div>
-            </header>
-
-            <!-- Scrollable Content -->
-            <main class="flex-grow overflow-y-auto p-6">
-                @if(session('success'))
-                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                @yield('content')
-            </main>
         </div>
-    </div>
+    </nav>
+
+    {{-- Flash Notifications & Container --}}
+    <main class="py-4">
+        <div class="container-fluid px-4">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+                    <div>{{ session('success') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                    <div>{{ session('error') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <div class="fw-bold mb-1"><i class="bi bi-exclamation-octagon me-1"></i>Please fix the following validation errors:</div>
+                    <ul class="mb-0 ps-3">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @yield('admin_content')
+        </div>
+    </main>
+
+    <!-- jQuery 3.7.1 -->
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script>window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.7.1.min.js"><\/script>')</script>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+
+    @stack('scripts')
 </body>
 </html>

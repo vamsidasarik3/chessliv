@@ -20,9 +20,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        require_once __DIR__ . '/TwentyMoreArticlesSeeder.php';
+
         $this->call([
             ChesslivSeeder::class,
             ArticleGameSeeder::class,
+            TwentyMoreArticlesSeeder::class,
         ]);
     }
 }

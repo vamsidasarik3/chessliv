@@ -60,8 +60,9 @@ class ExportDatabaseForDeployCommand extends Command
             }
         } else {
             $timestamp = date('Ymd_His');
-            $outputPath = $exportDir . DIRECTORY_SEPARATOR . "db_export_{$database}_{$timestamp}.sql.gz";
+            $outputPath = $exportDir . '/' . "db_export_{$database}_{$timestamp}.sql.gz";
         }
+        $outputPath = str_replace('\\', '/', $outputPath);
 
         $mysqldump = $this->findMysqldumpBinary();
         if (!$mysqldump) {
@@ -69,7 +70,7 @@ class ExportDatabaseForDeployCommand extends Command
             return 1;
         }
 
-        $tempSqlFile = storage_path('app/deployments/exports/temp_' . uniqid() . '.sql');
+        $tempSqlFile = str_replace('\\', '/', storage_path('app/deployments/exports/dump_' . uniqid() . '.sql'));
 
         $command = [
             $mysqldump,

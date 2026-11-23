@@ -144,9 +144,9 @@ DEPLOY_REMOTE_PATH="${DEPLOY_REMOTE_PATH:-/home/vamsidasarik/web/chessliv.com/pu
 DEPLOY_BRANCH="${DEPLOY_BRANCH:-main}"
 DEPLOY_REMOTE_PHP="${DEPLOY_REMOTE_PHP:-php}"
 DEPLOY_REMOTE_COMPOSER="${DEPLOY_REMOTE_COMPOSER:-composer}"
-DEPLOY_REMOTE_DB="${DEPLOY_REMOTE_DB:-vamsidasarik_chessliv}"
-DEPLOY_REMOTE_DB_USER="${DEPLOY_REMOTE_DB_USER:-vamsidasarik_chessliv}"
-DEPLOY_REMOTE_DB_PASS="${DEPLOY_REMOTE_DB_PASS:-}"
+DEPLOY_REMOTE_DB="${DEPLOY_REMOTE_DB:-vamsidasarik_chesslivdb}"
+DEPLOY_REMOTE_DB_USER="${DEPLOY_REMOTE_DB_USER:-vamsidasarik_chesslivdb}"
+DEPLOY_REMOTE_DB_PASS="${DEPLOY_REMOTE_DB_PASS:-Ch3ssL1v_Secure2026}"
 DEPLOY_BACKUP_DB="${DEPLOY_BACKUP_DB:-true}"
 DEPLOY_HEALTHCHECK_URL="${DEPLOY_HEALTHCHECK_URL:-https://chessliv.com}"
 DEPLOY_KEEP_LOCAL_BUNDLE="${DEPLOY_KEEP_LOCAL_BUNDLE:-false}"
@@ -445,9 +445,9 @@ if [ "${DEPLOY_BACKUP_DB}" = "true" ]; then
     BACKUP_FILE="${BACKUP_DIR}/db_backup_$(date +%Y%m%d_%H%M%S).sql"
 
     if command -v mariadb-dump >/dev/null 2>&1; then
-        mariadb-dump -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" -p"${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}" > "${BACKUP_FILE}" 2>/dev/null || true
+        mariadb-dump -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" --password="${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}" > "${BACKUP_FILE}" 2>/dev/null || true
     elif command -v mysqldump >/dev/null 2>&1; then
-        mysqldump -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" -p"${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}" > "${BACKUP_FILE}" 2>/dev/null || true
+        mysqldump -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" --password="${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}" > "${BACKUP_FILE}" 2>/dev/null || true
     fi
     if [ -f "${BACKUP_FILE}" ] && [ -s "${BACKUP_FILE}" ]; then
         echo "Database backup created: ${BACKUP_FILE} ($(du -h "${BACKUP_FILE}" | cut -f1))"
@@ -461,9 +461,9 @@ if [ "${SKIP_DB}" = "false" ] && [ -n "${REMOTE_BUNDLE_PATH}" ] && [ -f "${REMOT
     command -v "${MYSQL_CLI}" >/dev/null 2>&1 || MYSQL_CLI="mysql"
 
     if [[ "${REMOTE_BUNDLE_PATH}" == *.gz ]]; then
-        gzip -dc "${REMOTE_BUNDLE_PATH}" | "${MYSQL_CLI}" -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" -p"${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}"
+        gzip -dc "${REMOTE_BUNDLE_PATH}" | "${MYSQL_CLI}" -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" --password="${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}"
     else
-        "${MYSQL_CLI}" -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" -p"${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}" < "${REMOTE_BUNDLE_PATH}"
+        "${MYSQL_CLI}" -h 127.0.0.1 -u "${DEPLOY_REMOTE_DB_USER}" --password="${DEPLOY_REMOTE_DB_PASS}" "${DEPLOY_REMOTE_DB}" < "${REMOTE_BUNDLE_PATH}"
     fi
     echo "Database import completed successfully!"
 

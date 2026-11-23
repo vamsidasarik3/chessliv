@@ -1,0 +1,3 @@
+scripts\deploy.sh
+
+(or with a custom commit message: scripts\deploy.bat -m "Your commit message")
